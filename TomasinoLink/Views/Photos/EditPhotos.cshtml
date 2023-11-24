@@ -1,0 +1,97 @@
+﻿@model IEnumerable<TomasinoLink.ViewModels.PhotoViewModel>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-4">
+            <!-- Profile Section -->
+            <div class="profile-info text-center">
+                @{
+                    var profilePicture = Model.FirstOrDefault(p => p.IsProfilePicture);
+                    var profilePicturePath = profilePicture != null
+                    ? "~/Content/Images/" + profilePicture.FileName
+                    : "~/Content/Images/default-profile.jpg"; // Path to a default image if no profile picture is set
+                }
+                <img src="@Url.Content(profilePicturePath)" alt="Profile Picture" class="profile-picture img-thumbnail">
+                <h3>Your Profile</h3>
+                <p><strong>Name:</strong> [no database table yet]</p>
+                <p><strong>Age:</strong> [cinocode pa po]</p>
+                <p><strong>Location:</strong> [no database table yet]</p>
+                <p><strong>Description:</strong> [no database table yet]</p>
+                <p><strong>Interest:</strong> [cinocode pa po]</p>
+                <!-- Add more profile details here -->
+            </div>
+        </div>
+        <div class="col-md-8">
+            <!-- Tab links -->
+            <ul class="nav nav-tabs">
+                <li class="nav-item">
+                    <a class="nav-link" href="@Url.Action("EditProfile", "Profile")">Edit Profile</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="#">Edit Photos</a>
+                </li>
+            </ul>
+
+            <!-- Tab content for Edit Photos -->
+            <div class="tab-content mt-3" id="editPhotosTab">
+                <div class="tab-pane fade show active" id="photos" role="tabpanel">
+                        <h3>Upload New Photo</h3>
+                        @using (Html.BeginForm("Add", "Photos", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                        {
+                            <input type="file" name="file" />
+                            <input type="submit" value="Upload Photo" />
+                        }
+                    </div>
+                    <div class="photo-gallery d-flex flex-row">
+                        @foreach (var photo in Model)
+                        {
+                            <div class="photo-container mr-3">
+                                <img src="@Url.Content("~/Content/Images/" + photo.FileName)" alt="Photo" class="img-thumbnail" />
+                                @using (Html.BeginForm("SetAsMain", "Photos", FormMethod.Post))
+                                {
+                                    <input type="hidden" name="id" value="@photo.PhotoID" />
+                                    <input type="submit" value="Set as Main" class="btn btn-primary" />
+                                }
+                                @using (Html.BeginForm("Delete", "Photos", FormMethod.Post))
+                                {
+                                    <input type="hidden" name="id" value="@photo.PhotoID" />
+                                    <input type="submit" value="Delete" class="btn btn-danger" />
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .profile-info {
+        border: 1px solid #ddd;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .profile-picture {
+        width: 100%; /* Adjust to your preference */
+        margin-bottom: 20px;
+    }
+
+    .photo-gallery {
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    .photo-container {
+        display: inline-block;
+        vertical-align: top;
+        margin-right: 10px;
+    }
+
+        .photo-container img {
+            width: 150px; /* Adjust to your preference */
+            height: auto;
+            margin-bottom: 10px;
+        }
+</style>
