@@ -1,107 +1,125 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Authorization;
 using System.IO;
-using System.Linq;
+using System.Threading.Tasks;
 using TomasinoLink.Models;
-using TomasinoLink.ViewModels; // Ensure you have this using directive for PhotoViewModel
-using System.Collections.Generic; // For IEnumerable
+using TomasinoLink.ViewModels;
+using System.Linq;
 
-public class PhotosController : Controller
+namespace TomasinoLink.Controllers
 {
-    private readonly TomasinoLinkDbContext db;
-    private readonly IWebHostEnvironment webHostEnvironment;
-
-    public PhotosController(TomasinoLinkDbContext context, IWebHostEnvironment env)
+    [Authorize] // Ensure only authenticated users can access methods
+    public class PhotosController : Controller
     {
-        db = context;
-        webHostEnvironment = env;
-    }
+        private readonly TomasinoLinkDbContext db;
+        private readonly IWebHostEnvironment webHostEnvironment;
+        private readonly UserManager<IdentityUser> userManager;
 
-    public IActionResult EditPhotos()
-    {
-        // Create a list of PhotoViewModels from the Photo data model
-        var photoViewModels = db.Photos.Select(p => new PhotoViewModel
+        public PhotosController(TomasinoLinkDbContext context, IWebHostEnvironment env, UserManager<IdentityUser> userManager)
         {
-            PhotoID = p.PhotoID,
-            FileName = p.FileName,
-            IsProfilePicture = p.IsProfilePicture
-            // Add other properties as necessary
-        }).ToList();
+            db = context;
+            webHostEnvironment = env;
+            this.userManager = userManager;
+        }
 
-        return View(photoViewModels);
-    }
-
-    [HttpPost]
-    public ActionResult Add(IFormFile file)
-    {
-        if (file != null && file.Length > 0)
+        public IActionResult EditPhotos()
         {
-            var fileName = Path.GetFileName(file.FileName);
-            // Use the correct path where you want to save the images
-            var uploads = Path.Combine(webHostEnvironment.WebRootPath, "Content", "Images");
+            var userId = userManager.GetUserId(User); // Get the current authenticated user's ID
+            var photoViewModels = db.Photos
+                .Where(p => p.UserID == userId)
+                .Select(p => new PhotoViewModel
+                {
+                    PhotoID = p.PhotoID,
+                    FileName = p.FileName,
+                    IsProfilePicture = p.IsProfilePicture
+                }).ToList();
 
-            // Ensure the directory exists
-            if (!Directory.Exists(uploads))
+            return View(photoViewModels);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> Add(IFormFile file)
+        {
+            if (file != null && file.Length > 0)
             {
-                Directory.CreateDirectory(uploads);
+                var user = await userManager.GetUserAsync(User);
+                if (user == null)
+                {
+                    return Unauthorized(); // or redirect to login
+                }
+
+                var fileName = Path.GetFileName(file.FileName);
+                var uploads = Path.Combine(webHostEnvironment.WebRootPath, "Content", "Images");
+
+                if (!Directory.Exists(uploads))
+                {
+                    Directory.CreateDirectory(uploads);
+                }
+
+                var filePath = Path.Combine(uploads, fileName);
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(fileStream);
+                }
+
+                var photo = new Photo
+                {
+                    UserID = user.Id,
+                    FileName = fileName,
+                    IsProfilePicture = false
+                };
+
+                db.Photos.Add(photo);
+                await db.SaveChangesAsync();
+
+                return RedirectToAction("EditPhotos");
             }
 
-            var filePath = Path.Combine(uploads, fileName);
-            using (var fileStream = new FileStream(filePath, FileMode.Create))
+            return View("EditPhotos");
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> Delete(int id)
+        {
+            var user = await userManager.GetUserAsync(User);
+            var photo = await db.Photos.FindAsync(id);
+
+            if (photo != null && photo.UserID == user.Id)
             {
-                file.CopyTo(fileStream);
+                db.Photos.Remove(photo);
+                await db.SaveChangesAsync();
+
+                var filePath = Path.Combine(webHostEnvironment.WebRootPath, "images", photo.FileName);
+                if (System.IO.File.Exists(filePath))
+                {
+                    System.IO.File.Delete(filePath);
+                }
             }
 
-            var photo = new Photo
-            {
-                // Replace with your user authentication logic later
-                UserID = 1,
-                FileName = fileName,
-                IsProfilePicture = false
-            };
-
-            db.Photos.Add(photo);
-            db.SaveChanges();
+            return RedirectToAction("EditPhotos");
         }
 
-        return RedirectToAction("EditPhotos");
-    }
-
-    [HttpPost]
-    public ActionResult Delete(int id)
-    {
-        var photo = db.Photos.Find(id);
-        if (photo != null)
+        [HttpPost]
+        public async Task<ActionResult> SetAsMain(int id)
         {
-            db.Photos.Remove(photo);
-            db.SaveChanges();
+            var user = await userManager.GetUserAsync(User);
+            var allPhotos = db.Photos.Where(p => p.UserID == user.Id).ToList();
 
-            var filePath = Path.Combine(webHostEnvironment.WebRootPath, "images", photo.FileName);
-            if (System.IO.File.Exists(filePath))
+            foreach (var photo in allPhotos)
             {
-                System.IO.File.Delete(filePath);
+                photo.IsProfilePicture = false;
             }
+
+            var selectedPhoto = allPhotos.FirstOrDefault(p => p.PhotoID == id);
+            if (selectedPhoto != null)
+            {
+                selectedPhoto.IsProfilePicture = true;
+                await db.SaveChangesAsync();
+            }
+
+            return RedirectToAction("EditPhotos");
         }
-
-        return RedirectToAction("EditPhotos");
-    }
-
-    [HttpPost]
-    public ActionResult SetAsMain(int id)
-    {
-        var allPhotos = db.Photos.ToList();
-        foreach (var photo in allPhotos)
-        {
-            photo.IsProfilePicture = false;
-        }
-
-        var selectedPhoto = db.Photos.FirstOrDefault(p => p.PhotoID == id);
-        if (selectedPhoto != null)
-        {
-            selectedPhoto.IsProfilePicture = true;
-            db.SaveChanges();
-        }
-
-        return RedirectToAction("EditPhotos");
     }
 }

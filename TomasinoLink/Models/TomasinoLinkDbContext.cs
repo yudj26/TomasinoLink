@@ -1,6 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Reflection.Emit;
 using TomasinoLink.Models;
 
 public class TomasinoLinkDbContext : DbContext
