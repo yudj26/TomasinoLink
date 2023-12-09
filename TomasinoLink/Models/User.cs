@@ -1,13 +1,17 @@
-﻿public class Profile
-{
-    public int ProfileId { get; set; }
-    public int UserId { get; set; } // Foreign key to User
-    public string NameDisplay { get; set; }
-    public string Bio { get; set; }
-    public string Location { get; set; }
-    public int? FacultyId { get; set; } // Foreign key to Faculty, can be nullable
+﻿using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-    // Navigation properties
-    public virtual User User { get; set; }
-    public virtual Faculty Faculty { get; set; }
+public class User
+{
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int UserId { get; set; }
+    public string Email { get; set; }
+    public string PasswordHash { get; set; }
+    public DateTime DateOfBirth { get; set; }
+    public string Gender { get; set; }
+
+    // Other properties as needed, but not the ones from IdentityUser
 }
+    

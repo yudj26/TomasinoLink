@@ -3,15 +3,26 @@ using TomasinoLink.Models;
 
 public class TomasinoLinkDbContext : DbContext
 {
-    public TomasinoLinkDbContext(DbContextOptions<TomasinoLinkDbContext> options) : base(options)
+    public TomasinoLinkDbContext(DbContextOptions<TomasinoLinkDbContext> options)
+        : base(options)
     {
     }
 
+    public DbSet<User> Users { get; set; } // Now you need to explicitly declare this
+
+    // Other DbSets for your application
     public DbSet<Photo> Photos { get; set; }
-    // ... DbSet properties for other entities
+    public DbSet<Profile> Profiles { get; set; }
+    public DbSet<Faculty> Faculties { get; set; }
+    // ... any other DbSet declarations
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // Optional: Customize your model conventions here
+        modelBuilder.Entity<User>()
+            .Property(u => u.UserId)
+            .ValueGeneratedOnAdd(); // This ensures the ID is auto-generated
+
+        // Other configurations...
     }
+
 }

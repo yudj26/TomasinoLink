@@ -1,0 +1,42 @@
+﻿@model TomasinoLink.ViewModels.ProfileViewModel
+
+@{
+    ViewData["Title"] = "Edit Profile";
+}
+
+<h2>Edit Profile</h2>
+
+@using (Html.BeginForm("EditProfiles", "Profiles", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.NameDisplay)
+        @Html.TextBoxFor(model => model.NameDisplay, new { @class = "form-control" })
+        @Html.ValidationMessageFor(model => model.NameDisplay)
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Bio)
+        @Html.TextAreaFor(model => model.Bio, new { @class = "form-control" })
+        @Html.ValidationMessageFor(model => model.Bio)
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Interest)
+        @Html.TextAreaFor(model => model.Interest, new { @class = "form-control" })
+        @Html.ValidationMessageFor(model => model.Interest)
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(model => model.Location)
+        @Html.TextAreaFor(model => model.Location, new { @class = "form-control" })
+        @Html.ValidationMessageFor(model => model.Location)
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(model => model.FacultyId)
+        @Html.DropDownListFor(model => model.FacultyId, Model.FacultyList, "Select Faculty", new { @class = "form-control" })
+        @Html.ValidationMessageFor(model => model.FacultyId)
+    </div>
+
+    <button type="submit" class="btn btn-primary">Update Profile</button>
+}

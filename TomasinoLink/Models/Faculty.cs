@@ -8,3 +8,4 @@
         // Navigation property to Profiles
         public virtual ICollection<Profile> Profiles { get; set; }
     }
+}

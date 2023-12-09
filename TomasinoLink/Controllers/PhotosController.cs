@@ -1,12 +1,8 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Hosting;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using System.IO;
-using System.Threading.Tasks;
 using TomasinoLink.Models;
 using TomasinoLink.ViewModels;
-using System.Linq;
+using System.Security.Claims;
 
 namespace TomasinoLink.Controllers
 {
@@ -15,23 +11,33 @@ namespace TomasinoLink.Controllers
     {
         private readonly TomasinoLinkDbContext db;
         private readonly IWebHostEnvironment webHostEnvironment;
-        private readonly UserManager<IdentityUser> userManager;
 
-        public PhotosController(TomasinoLinkDbContext context, IWebHostEnvironment env, UserManager<IdentityUser> userManager)
+        public PhotosController(TomasinoLinkDbContext context, IWebHostEnvironment env)
         {
             db = context;
             webHostEnvironment = env;
-            this.userManager = userManager;
+        }
+
+        private int GetCurrentUserId()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim != null && int.TryParse(userIdClaim.Value, out int userId))
+            {
+                return userId;
+            }
+
+            // Handle the case where userId cannot be parsed to an integer
+            throw new UnauthorizedAccessException("User ID not found or invalid.");
         }
 
         public IActionResult EditPhotos()
         {
-            var userId = userManager.GetUserId(User); // Get the current authenticated user's ID
+            int userId = GetCurrentUserId();
             var photoViewModels = db.Photos
-                .Where(p => p.UserID == userId)
+                .Where(p => p.UserId == userId)
                 .Select(p => new PhotoViewModel
                 {
-                    PhotoID = p.PhotoID,
+                    PhotoID = p.PhotoId,
                     FileName = p.FileName,
                     IsProfilePicture = p.IsProfilePicture
                 }).ToList();
@@ -44,12 +50,7 @@ namespace TomasinoLink.Controllers
         {
             if (file != null && file.Length > 0)
             {
-                var user = await userManager.GetUserAsync(User);
-                if (user == null)
-                {
-                    return Unauthorized(); // or redirect to login
-                }
-
+                int userId = GetCurrentUserId();
                 var fileName = Path.GetFileName(file.FileName);
                 var uploads = Path.Combine(webHostEnvironment.WebRootPath, "Content", "Images");
 
@@ -66,7 +67,7 @@ namespace TomasinoLink.Controllers
 
                 var photo = new Photo
                 {
-                    UserID = user.Id,
+                    UserId = userId,
                     FileName = fileName,
                     IsProfilePicture = false
                 };
@@ -83,10 +84,10 @@ namespace TomasinoLink.Controllers
         [HttpPost]
         public async Task<ActionResult> Delete(int id)
         {
-            var user = await userManager.GetUserAsync(User);
+            int userId = GetCurrentUserId();
             var photo = await db.Photos.FindAsync(id);
 
-            if (photo != null && photo.UserID == user.Id)
+            if (photo != null && photo.UserId == userId)
             {
                 db.Photos.Remove(photo);
                 await db.SaveChangesAsync();
@@ -104,15 +105,15 @@ namespace TomasinoLink.Controllers
         [HttpPost]
         public async Task<ActionResult> SetAsMain(int id)
         {
-            var user = await userManager.GetUserAsync(User);
-            var allPhotos = db.Photos.Where(p => p.UserID == user.Id).ToList();
+            int userId = GetCurrentUserId();
+            var allPhotos = db.Photos.Where(p => p.UserId == userId).ToList();
 
             foreach (var photo in allPhotos)
             {
                 photo.IsProfilePicture = false;
             }
 
-            var selectedPhoto = allPhotos.FirstOrDefault(p => p.PhotoID == id);
+            var selectedPhoto = allPhotos.FirstOrDefault(p => p.PhotoId == id);
             if (selectedPhoto != null)
             {
                 selectedPhoto.IsProfilePicture = true;

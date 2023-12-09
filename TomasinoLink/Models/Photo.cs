@@ -2,8 +2,8 @@
 {
     public class Photo
     {
-        public int PhotoID { get; set; } // Primary key
-        public int UserID { get; set; } // Foreign key reference to the User
+        public int PhotoId { get; set; } // Primary key
+        public int UserId { get; set; } // Foreign key reference to the User
         public string FileName { get; set; }
         public bool IsProfilePicture { get; set; }
 
