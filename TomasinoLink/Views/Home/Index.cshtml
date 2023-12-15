@@ -2,7 +2,45 @@
     ViewData["Title"] = "Home Page";
 }
 
+<style>
+    body {
+        background-image: url('@Url.Content("~/Content/Images/background.jpg")');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed; /* Optional: to fix the background image during scroll */
+    }
+
+    .text-center {
+        color: white; /* Set the text color to white */
+        height: 100vh; /* Set the height to full viewport height */
+        display: flex; /* Use flexbox for centering */
+        flex-direction: column; /* Stack elements vertically */
+        justify-content: center; /* Center vertically */
+        align-items: center; /* Center horizontally */
+    }
+
+    .display-4 {
+        display: inline-block; /* Ensure inline block for inline styling */
+        background-color: rgba(0, 0, 0, 0.7); /* Set a semi-transparent black background color for text */
+        color: white; /* Set the text color for "FIND YOUR LOVE" */
+        padding: 10px; /* Add padding for spacing */
+        border-radius: 10px; /* Add rounded corners */
+        margin-bottom: 10px; /* Add margin to separate the two headings */
+    }
+
+    .link-text {
+        display: inline-block; /* Ensure inline block for inline styling */
+        background-color: rgba(0, 0, 0, 0.7); /* Set a semi-transparent black background color for text */
+        color: white; /* Set the text color for "FIND YOUR LOVE" */
+        padding: 10px; /* Add padding for spacing */
+        border-radius: 10px; /* Add rounded corners */
+        margin-bottom: 10px; /* Add margin to separate the two headings */
+    }
+
+</style>
+
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <h1 class="display-4">FIND YOUR LOVE, </h1><br />
+    <h1 class="display-4">FIND YOUR MATCH.</h1>
+    <p class="link-text"> Link Together with other Tomasinos!</p>
 </div>

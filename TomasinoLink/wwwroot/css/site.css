@@ -14,5 +14,16 @@ html {
 }
 
 body {
-  margin-bottom: 60px;
+  margin-bottom: 60px;  
+
+
 }
+.logo {
+    display: inline-block;
+}
+
+    .logo img {
+        height: 75px; /* Set the desired height of your icon */
+        width: auto; /* Maintain the aspect ratio */
+        vertical-align: middle; /* Align the icon vertically */
+    }

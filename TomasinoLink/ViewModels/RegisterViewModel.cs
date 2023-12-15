@@ -20,7 +20,10 @@ namespace TomasinoLink.ViewModels
         [Required, StringLength(50)]
         public string? Gender { get; set; }
 
-        // Additional properties as needed
+        [Required, DataType(DataType.Password)]
+        [Display(Name = "Confirm Password")]
+        [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+        public string? ConfirmPassword { get; set; }
     }
 }
     

@@ -6,7 +6,7 @@
 
 <h2>Edit Profile</h2>
 
-@using (Html.BeginForm("EditProfiles", "Profiles", FormMethod.Post))
+@using (Html.BeginForm("EditProfiles", "EditProfile", FormMethod.Post))
 {
     @Html.AntiForgeryToken()
 
@@ -40,3 +40,29 @@
 
     <button type="submit" class="btn btn-primary">Update Profile</button>
 }
+<footer>
+    <!-- Your footer content -->
+</footer>
+<style>
+    html {
+        height: 100%; /* Ensure html takes full height */
+    }
+
+    body {
+        margin: 0; /* Reset default margin */
+        height: 100%; /* Ensure body takes full height */
+        background: linear-gradient(white, #FEC00F); /* Apply gradient to body */
+        display: flex; /* Use flexbox layout */
+        flex-direction: column; /* Stack flex children vertically */
+    }
+
+    .container {
+        flex: 1; /* Flex container will take up remaining space */
+        display: flex; /* Use flexbox layout */
+        flex-direction: column; /* Stack flex children vertically */
+    }
+
+    .content {
+        flex: 1; /* Content will expand to take available space */
+    }
+</style>

@@ -7,50 +7,69 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/TomasinoLink.styles.css" asp-append-version="true" />
+
+    <style>
+        .account-dropdown {
+            margin-right: 20px; /* Adds space on the right side of the dropdown */
+        }
+    </style>
 </head>
 <body>
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">TomasinoLink</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Photos" asp-action="EditPhotos">Edit Photos</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Profiles" asp-action="EditProfiles">Edit Profile</a>
-                        </li>
-                    </ul>
-                    <ul class="navbar-nav ml-auto">
-                        <!-- Add ml-auto class to push items to the right -->
-                        <div class="nav-item dropdown">
-                            <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                                My Account
-                            </button>
-                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                @if (User.Identity.IsAuthenticated)
-                                {
-                                    <form asp-controller="Account" asp-action="Logout" method="post" asp-antiforgery="true">
-                                        <button type="submit" class="dropdown-item">Logout</button>
-                                    </form>
-                                }
-                                else
-                                {
-                                    <a class="dropdown-item" asp-controller="Account" asp-action="Login">Log In</a>
-                                    <a class="dropdown-item" asp-controller="Account" asp-action="Register">Sign Up</a>
-                                }
-                            </div>
+            <div class="logo">
+                <img src="~/Content/Images/TomasinoLink.png" alt="TomasinoLink">
+            </div>
+            <!-- Other navbar content here -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                <ul class="navbar-nav flex-grow-1">
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("Aboutus", "Home")">About Us</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" asp-area="" asp-controller="Profiles" asp-action="ShowProfile">Profile</a>
+                    </li>
+                    <!-- <li class="nav-item">
+                        <a class="nav-link text-dark" asp-area="" asp-controller="Photos" asp-action="EditPhotos">Edit Photos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" asp-area="" asp-controller="EditProfile" asp-action="EditProfiles">Edit Profile</a> -->
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Users" asp-action="FindYourLink">Find Your Link</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Linked" asp-action="Matches">Matches</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ml-auto">
+                    <!-- Add ml-auto class to push items to the right -->
+                    <li class="nav-item dropdown account-dropdown">
+                        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                            My Account
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            @if (User.Identity.IsAuthenticated)
+                            {
+                                <form asp-controller="Account" asp-action="Logout" method="post" asp-antiforgery="true">
+                                    <button type="submit" class="dropdown-item">Logout</button>
+                                </form>
+                            }
+                            else
+                            {
+                                <a class="dropdown-item" asp-controller="Account" asp-action="Login">Log In</a>
+                                <a class="dropdown-item" asp-controller="Account" asp-action="Register">Sign Up</a>
+                            }
                         </div>
-                    </ul>
-                </div>
+                    </li>
+                </ul>
             </div>
         </nav>
     </header>
@@ -59,12 +78,6 @@
             @RenderBody()
         </main>
     </div>
-
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2023 - TomasinoLink - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

@@ -71,8 +71,14 @@ public class AccountController : Controller
             // Save changes to create the Profile
             await _context.SaveChangesAsync();
 
-            // Redirect to the Login page after successful registration
-            return RedirectToAction("Login");
+            // Sign in the user here if you want them to be logged in immediately after registering
+            await SignInUser(user);
+
+            // Set a message to be displayed on the ShowProfile page
+            TempData["ProfileMessage"] = "Please edit your profile.";
+
+            // Redirect to the ShowProfile page
+            return RedirectToAction("ShowProfile", "Profiles");
         }
 
         return View(model);

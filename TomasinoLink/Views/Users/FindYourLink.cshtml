@@ -1,0 +1,106 @@
+﻿@using TomasinoLink.ViewModels
+@model IEnumerable<UserCardViewModel>
+
+<style>
+    .user-cards-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-around; /* This will space out the cards evenly */
+        gap: 15px; /* Adjust the gap as needed */
+    }
+
+    .user-card {
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        width: calc(25% - 15px); /* This ensures four cards per row, accounting for the gap */
+        text-align: center;
+        position: relative;
+        background: white;
+        margin-bottom: 15px; /* Space between the cards vertically */
+        overflow: hidden; /* Ensures that the overlay doesn't go outside the card */
+    }
+
+        .user-card img {
+            width: 100%;
+            height:270px;
+            aspect-ratio: 1 / 1; /* Maintain a square aspect ratio */
+            object-fit: cover; /* Crop the image to cover the area */
+            border-top-left-radius: 4px;
+            border-top-right-radius: 4px;
+        }
+
+    .user-details {
+        padding: 8px;
+        background-color: #f9f9f9; /* Light grey background */
+        font-size: 0.9em; /* Adjust text size as needed */
+        display: flex;
+        flex-direction: column;
+        justify-content: center; /* Center content vertically */
+        align-items: center; /* Center content horizontally */
+    }
+
+    .user-actions {
+        position: absolute;
+        top: 0;
+        width:100%;
+        height:270px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background-color: rgba(0,0,0,0.7); /* Semi-transparent overlay */
+        transition: opacity 0.3s ease-in-out;
+        opacity: 0; /* Make it invisible initially */
+    }
+
+    .user-card:hover .user-actions {
+        display: flex;
+        opacity: 1; /* Make it visible on hover */
+    }
+
+    .btn {
+        border: none;
+        background: #333; /* A default background for the buttons */
+        color: white;
+        padding: 10px 20px;
+        margin: 5px; /* Add space between buttons */
+        cursor: pointer;
+        border-radius: 4px;
+        transition: background-color 0.3s ease-in-out;
+    }
+
+        .btn:hover {
+            background-color: rgba(255,255,255,0.3); /* Slight background on hover */
+        }
+
+    .link-button {
+        background-color: #ff6b6b; /* Red color for the link button */
+        color: white;
+        border-radius: 4px;
+    }
+
+</style>
+
+<div class="user-cards-container">
+    @foreach (var user in Model)
+    {
+        <div class="user-card">
+            <img src="@Url.Content("~/Content/Images/" + user.ProfilePictureUrl)" alt="@user.Name" />
+            <div class="user-actions">
+                <!-- Generate URL to the ShowProfile action, passing the UserId -->
+                <a href="@Url.Action("ShowProfile", "Profiles", new { userId = user.UserId })" class="btn">Profile</a>
+                <button class="btn link-button" onclick="location.href='@Url.Action("LinkUser", "Linked", new { linkId = user.UserId })'">
+                    @(user.IsLinked ? "Unlink" : "Link")
+                </button>
+            </div>
+            <div class="user-details">
+                <span>@user.Name, @user.Age</span>
+                <span>@user.Faculty</span>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="~/js/userCardHover.js"></script>
+}

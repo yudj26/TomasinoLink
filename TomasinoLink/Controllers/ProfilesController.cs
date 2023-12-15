@@ -1,99 +1,103 @@
-﻿using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using TomasinoLink.Models;
 using TomasinoLink.ViewModels;
+using System.Diagnostics;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 public class ProfilesController : Controller
 {
+    private readonly TomasinoLinkDbContext _context;
+
     public ProfilesController(TomasinoLinkDbContext context)
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));
-        if (context == null)
-        {
-            // You can replace this with your logging mechanism
-            throw new ArgumentNullException(nameof(context));
-        }
-
-        _context = context;
     }
 
-    private readonly TomasinoLinkDbContext _context;
-    // Constructor, GetCurrentUserId, other actions...
     private int GetCurrentUserId()
     {
-        // Assuming the user's ID is stored in the NameIdentifier claim
-        var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
-
-        if (userIdClaim != null)
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+        if (userIdClaim != null && int.TryParse(userIdClaim.Value, out int userId))
         {
-            if (int.TryParse(userIdClaim.Value, out int userId))
-            {
-                return userId;
-            }
-            else
-            {
-                throw new ApplicationException("Invalid user ID in claims.");
-            }
+            return userId;
         }
         else
         {
-            throw new ApplicationException("No user ID claim present.");
+            // Handle this gracefully by redirecting to an error or login page
+            return -1; // Indicate an invalid user ID
         }
     }
 
-
-    // GET: Profiles/EditProfile
-    public async Task<IActionResult> EditProfiles()
+    [HttpGet("Profiles/ShowProfile/{userId?}")]
+    public async Task<IActionResult> ShowProfile(int? userId)
     {
-        int userId = GetCurrentUserId();
-        var profile = await _context.Profiles.FirstOrDefaultAsync(p => p.UserId == userId);
+        // If no userId is provided, use the ID of the currently logged-in user
+        int userToDisplayId = userId ?? GetCurrentUserId();
 
-        if (profile == null)
+        if (userToDisplayId == -1)
         {
-            // Handle the case where the profile does not exist
+            // Redirect to login or show error
+            return RedirectToErrorView();
         }
 
-        var viewModel = new ProfileViewModel
+        var user = await _context.Users.FindAsync(userToDisplayId);
+        if (user == null)
         {
+            // User not found, show error
+            return RedirectToErrorView();
+        }
+
+        var profile = await _context.Profiles
+                                    .Include(p => p.Faculty)
+                                    .FirstOrDefaultAsync(p => p.UserId == userToDisplayId);
+        if (profile == null)
+        {
+            // Profile not found, show error
+            return RedirectToErrorView();
+        }
+
+        // Calculate age
+        int age = DateTime.Today.Year - user.DateOfBirth.Year;
+        if (user.DateOfBirth.Date > DateTime.Today.AddYears(-age)) age--;
+
+        // Get photos
+        var photos = await _context.Photos
+                                   .Where(p => p.UserId == userToDisplayId)
+                                   .Select(p => new PhotoViewModel
+                                   {
+                                       PhotoID = p.PhotoId,
+                                       FileName = p.FileName,
+                                       IsProfilePicture = p.IsProfilePicture
+                                   })
+                                   .ToListAsync();
+
+        // Prepare the ViewModel
+        var viewModel = new ShowProfileViewModel
+        {
+            UserId = userToDisplayId,
             NameDisplay = profile.NameDisplay,
             Bio = profile.Bio,
             Location = profile.Location,
             Interest = profile.Interest,
             FacultyId = profile.FacultyId,
-            FacultyList = new SelectList(_context.Faculties, "FacultyId", "Name", profile.FacultyId)
+            FacultyList = new SelectList(await _context.Faculties.ToListAsync(), "FacultyId", "Name", profile.FacultyId),
+            Age = age,
+            Gender = user.Gender,
+            Photos = photos
         };
 
+        // Pass the current user ID to the view
+        ViewBag.CurrentUserId = GetCurrentUserId();
         return View(viewModel);
     }
 
-    // POST: Profiles/EditProfile
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> EditProfiles(ProfileViewModel model)
+    private IActionResult RedirectToErrorView()
     {
-        if (!ModelState.IsValid)
+        var errorViewModel = new ErrorViewModel
         {
-            model.FacultyList = new SelectList(_context.Faculties, "FacultyId", "Name", model.FacultyId);
-            return View(model);
-        }
-
-        int userId = GetCurrentUserId();
-        // Log the user ID to verify
-        Console.WriteLine("User ID: " + userId);
-        var profile = await _context.Profiles.FirstOrDefaultAsync(p => p.UserId == userId);
-
-        if (profile != null)
-        {
-            profile.NameDisplay = model.NameDisplay;
-            profile.Bio = model.Bio;
-            profile.Location = model.Location;
-            profile.Interest = model.Interest;
-            profile.FacultyId = model.FacultyId;
-
-            _context.Update(profile);
-            await _context.SaveChangesAsync();
-        }
-
-        return RedirectToAction("Index"); // Or whatever view you want to redirect to
+            RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier
+        };
+        return View("Error", errorViewModel);
     }
 }

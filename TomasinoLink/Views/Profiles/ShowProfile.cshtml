@@ -1,0 +1,148 @@
+﻿@model TomasinoLink.ViewModels.ShowProfileViewModel
+@{
+    if (TempData["ProfileMessage"] != null)
+    {
+        <div class="alert alert-info">
+            @TempData["ProfileMessage"]
+        </div>
+    }
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Photos</title>
+    <style>
+        html, body {
+            height: 100%; /* Ensure html and body take full height */
+            margin: 0; /* Reset default margin */
+            padding: 0; /* Reset default padding */
+            background: linear-gradient(white, #FEC00F); /* Apply gradient to body */
+        }
+
+        body {
+            display: flex; /* Use flexbox layout */
+            flex-direction: column; /* Stack flex children vertically */
+        }
+
+        #app {
+            flex: 1; /* Flex container will take up remaining space */
+            display: flex; /* Use flexbox layout */
+            flex-direction: column; /* Stack flex children vertically */
+        }
+
+        .container {
+            flex-grow: 1; /* Flex container will grow to take available space */
+            display: flex; /* Use flexbox layout */
+            flex-direction: column; /* Stack flex children vertically */
+        }
+
+        .content {
+            flex-grow: 1; /* Content will expand to take available space */
+            padding: 20px; /* Example padding */
+        }
+
+        .profile-info {
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .profile-picture {
+            width: 100%;
+            max-width: 200px; /* Adjust max-width as necessary */
+            margin-bottom: 20px;
+        }
+
+        .photo-gallery {
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .photo-container img {
+            width: 150px; /* Set a fixed width for photos */
+            height: auto; /* Keep aspect ratio */
+            margin-bottom: 10px;
+        }
+
+        footer {
+            padding: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+<div class="container">
+    <div class="row">
+        <div class="col-md-4">
+            <!-- Profile Section -->
+            <div class="profile-info text-center">
+                    @{
+                        var profilePicture = Model.Photos.FirstOrDefault(p => p.IsProfilePicture);
+                        var profilePicturePath = profilePicture != null
+                        ? "~/Content/Images/" + profilePicture.FileName
+                        : "~/Content/Images/default-profile.jpg"; // Path to a default image if no profile picture is set
+                    }
+                    <img src="@Url.Content(profilePicturePath)" alt="Profile Picture" class="profile-picture img-thumbnail">
+                <h2>@Model.NameDisplay's Profile</h2>
+                <p>Age: @Model.Age</p>
+                <p>Gender: @Model.Gender</p>
+                <p>Location: @Model.Location</p>
+                <!-- Ensure FacultyName is assigned in the ViewModel -->
+                    <p>Faculty: @Model.FacultyList?.FirstOrDefault(f => f.Value == Model.FacultyId.ToString())?.Text</p>
+                    <!-- Buttons to edit profile and photos -->
+                        @if (ViewBag.CurrentUserId == Model.UserId)
+                        {
+                            <a href="@Url.Action("EditProfiles", "EditProfile")" class="btn btn-primary">Edit Profile</a>
+                            <a href="@Url.Action("EditPhotos", "Photos")" class="btn btn-secondary">Edit Photos</a>
+                        }
+
+
+            </div>
+        </div>
+        <div class="col-md-8">
+            <!-- Tab links -->
+            <ul class="nav nav-tabs">
+                <li class="nav-item">
+                    <a class="nav-link active" data-toggle="tab" href="#about">About</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="tab" href="#photos">Photos</a>
+                </li>
+            </ul>
+
+            <!-- Tab content -->
+            <div class="tab-content mt-3">
+                <!-- About Tab -->
+                <div class="tab-pane fade show active" id="about" role="tabpanel">
+                    <h3>About @Model.NameDisplay</h3>
+                    <p><strong>Bio:</strong> @Model.Bio</p>
+                    <p><strong>Interest:</strong> @Model.Interest</p>
+                </div>
+
+                <!-- Photos Tab -->
+                    <div class="tab-pane fade" id="photos" role="tabpanel" aria-labelledby="photos-tab">
+                        <h3>@Model.NameDisplay's Photos</h3>
+                        <div class="photo-gallery d-flex flex-row">
+                            @foreach (var photo in Model.Photos)
+                            {
+                                <div class="photo-container mr-3">
+                                    <img src="@Url.Content("~/Content/Images/" + photo.FileName)" alt="Photo" class="img-thumbnail" />
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer>
+    </footer>
+</div>
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+}
+</body>
+</html>

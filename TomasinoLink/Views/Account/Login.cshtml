@@ -4,27 +4,43 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Login</h2>
+<style>
+    body {
+        background: url('@Url.Content("~/Content/Images/lovers.jpg")') no-repeat center center fixed;
+        background-size: cover;
+    }
 
+    .link-text {
+        color: white; /* Ensure the color is set to white */
+    }
+</style>
+
+<h2 class="link-text">Login</h2> <!-- Corrected the class attribute and closing tag -->
 @using (Html.BeginForm("Login", "Account", FormMethod.Post))
 {
     @Html.AntiForgeryToken()
 
     <div class="form-group">
+        <div class="link-text">
         @Html.LabelFor(m => m.Email)
         @Html.TextBoxFor(m => m.Email, new { @class = "form-control" })
         @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
     </div>
+    </div>
 
     <div class="form-group">
+        <div class="link-text">
         @Html.LabelFor(m => m.Password)
         @Html.PasswordFor(m => m.Password, new { @class = "form-control" })
         @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
     </div>
+    </div>
 
     <div class="form-group form-check">
+        <div class = "link-text">
         @Html.CheckBoxFor(m => m.RememberMe)
         @Html.LabelFor(m => m.RememberMe, new { @class = "form-check-label" })
+    </div>
     </div>
 
     <!-- Display the error message here -->

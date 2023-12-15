@@ -9,18 +9,12 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<TomasinoLinkDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DbTomasinoLink")));
 
-
-
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
         options.LoginPath = "/Account/Login";
         options.LogoutPath = "/Account/Logout";
     });
-
-// ... Other service configurations ...
-builder.Services.AddControllersWithViews();
-
 
 var app = builder.Build();
 
@@ -42,5 +36,9 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+app.MapControllerRoute(
+    name: "profile",
+    pattern: "Profiles/ShowProfile/{userId?}",
+    defaults: new { controller = "Profiles", action = "ShowProfile" });
 
 app.Run();
